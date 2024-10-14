@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            Hung Job Query
+        </title>
+        <style>
+            p{
+                font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-size:14px;
+            }
+            .query-part1{
+                color:rgb(5, 5, 148);
+            }
+            .query-part2{
+                color:green;
+            }
+        </style>
+    </head>
+    <body>
+        <p class="running-job">
+            <span class="query-part1">
+            Select distinct PT.Task_Caption,PT.Client_ID,
+            <br>T.Name,PS.Service_Name,PT.Record_UTC_Stamp as LastUpdateTime,
+            <br>pt.Environment_ID,PT.Request_Date_Start as StartTime,PT.Task_ID, (Latest.Last_Updated_UTC_Stamp) as Last_Updated_UTC_Stamp,
+            <br>PT.Step_CurrentStep_ID,PT.Service_ID,Pt.Correlation_ID,PT.Entity_ID
+            <br>from Processing_Task PT with(nolock) inner join Processing_Task_Allocation PTA with(nolock) 
+            <br>on PT.Task_ID = PTA.Task_ID
+            <br>inner join tenant T with(nolock) 
+            <br>on PT.Client_ID = T.Tenant_RecordID
+            <br>inner join Platform_Service PS with(nolock) 
+            <br>on PT.Service_ID = PS.Service_ID,
+            <br>(
+                <br> &emsp;select max(PTA.Last_Updated_UTC_Stamp) as Last_Updated_UTC_Stamp , PT.Task_ID
+                <br> &emsp;from Processing_Task PT with(nolock) inner join Processing_Task_Allocation PTA with(nolock) 
+                <br> &emsp;on PT.Task_ID = PTA.Task_ID
+                <br> &emsp;group by PT.Task_ID
+            <br>) Latest
+            <br>where PT.Task_ID = E.Task_ID and
+            <br>DATEDIFF(mi, ISNULL (Latest.Last_Updated_UTC_Stamp,0) ,GETUTCDATE()) &gt;10
+            <br>and PT.Task_ID = PTA.Task_ID
+            <br>and PT.Service_ID = PS.Service_ID
+            <br>and PT.Step_CurrentStep_ID &lt;&gt; 0
+            </span>
+            <br>
+            <br>
+            <span class="query-part2">
+            -- Enter Resource ID to check on any specific CPF Server--
+            <br>--and PTA.Resource_ID in (20,23)
+            <br>
+            <br>
+            -- Enter date/time to check between any specific duration--
+            <br>--and cast (PT.Request_Date_Start as date ) between cast(GETUTCDATE()-1 as date) and cast(GETUTCDATE() as date)
+            <br>
+            <br>
+            --Enter Client ID here to check for any specific client(s)--
+            <br>--and PT.Client_ID IN (
+            --'CF49269E-3238-488E-87A4-48D72C98C312'
+            --)
+            <br>
+            <br>
+            --Enter CPF service ID here ex: 7 for import and 21 for export --
+            <br>--and PT.Service_ID in (7)
+            <br>
+            <br>
+            --Enter Environment ID here 1 for IMP and 2 for Prod--
+            <br>--and PT.Environment_ID = 2
+            </span>
+        </p>
+    </body>
+</html>
