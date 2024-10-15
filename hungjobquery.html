@@ -36,7 +36,7 @@
                 <br> &emsp;on PT.Task_ID = PTA.Task_ID
                 <br> &emsp;group by PT.Task_ID
             <br>) Latest
-            <br>where PT.Task_ID = E.Task_ID and
+            <br>where PT.Task_ID = Latest.Task_ID and
             <br>DATEDIFF(mi, ISNULL (Latest.Last_Updated_UTC_Stamp,0) ,GETUTCDATE()) &gt;10
             <br>and PT.Task_ID = PTA.Task_ID
             <br>and PT.Service_ID = PS.Service_ID
